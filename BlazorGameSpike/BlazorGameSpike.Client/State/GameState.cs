@@ -4,7 +4,7 @@ public class GameState
 {
     public event Action? OnStateChange;
 
-    public double Currency { get; private set; } = 99999999;
+    public double Currency { get; private set; }
     public int EnemiesDefeated { get; private set; }
 
     public IReadOnlyDictionary<Upgrade, UpgradeState> Upgrades { get; private set; } =
