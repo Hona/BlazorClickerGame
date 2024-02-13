@@ -1,0 +1,38 @@
+﻿@rendermode InteractiveAuto
+@inherits GameStateComponent
+
+@* Get Upgrades in order *@
+
+<ol class="shop">
+    
+    @foreach (var upgrade in Enum.GetValues<Upgrade>())
+    {
+        var upgradeState = GameState.Upgrades[upgrade];
+
+        <li>
+            <button disabled="@(!CanAffordUpgrade(upgradeState))"
+                    @onclick="@(() => GameState.PurchaseUpgrade(upgrade))"
+                    title="@GetTooltip(upgrade)">
+                @upgrade.ToString() | $@upgradeState.CurrentCost.ToString("N0")
+                <br>
+                Level: @upgradeState.Level
+            </button>
+        </li>
+    }
+
+</ol>
+
+@{
+    bool CanAffordUpgrade(UpgradeState upgrade) 
+        => GameState.Currency >= upgrade.CurrentCost;
+    
+    string GetTooltip(Upgrade upgrade) 
+        => upgrade switch
+        {
+            Upgrade.Sword => "Increases click damage by 1",
+            Upgrade.Laser => "Increases passive damage by 1 per second",
+            Upgrade.Poison => "Increases click damage by 10% of passive damage",
+            Upgrade.Portal => "Decreases the passive damage interval by 10%",
+            _ => throw new NotImplementedException()
+        };
+}

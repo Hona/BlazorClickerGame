@@ -1,0 +1,24 @@
+﻿@page "/"
+@rendermode InteractiveAuto
+@inherits GameStateComponent
+
+<progress id="@EnemyProgressId" max="@GameState.CurrentMaxEnemyHealth" value="@GameState.EnemyHealth"></progress
+<label for="@EnemyProgressId">
+    @GameState.EnemyHealth/@GameState.CurrentMaxEnemyHealth
+</label>
+
+
+<br/>
+
+<EnemyImage />
+
+<button @onclick="@GameState.ClickDamageEnemy">
+    Attack
+</button>
+
+<PassiveDamageWorker />
+
+
+@code {
+    private const string EnemyProgressId = "enemy-health";
+}

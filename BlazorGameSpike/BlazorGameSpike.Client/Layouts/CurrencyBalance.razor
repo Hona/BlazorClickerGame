@@ -1,0 +1,48 @@
+﻿@inherits GameStateComponent
+@rendermode InteractiveAuto
+@implements IDisposable
+
+<output style="color: #EF476F; font-size: xxx-large"
+        class="@(_animating ? "shake" : "")">
+    $@GameState.Currency.ToString("0.00")
+</output>
+
+@code
+{
+    private bool _animating;
+    private double _previousCurrency;
+    
+    protected override void OnInitialized()
+    {
+        _previousCurrency = GameState.Currency;
+        GameState.OnStateChange += HandleStateChange;
+        
+        base.OnInitialized();
+    }
+    
+    void HandleStateChange()
+    {
+        // If the currency hasn't changed, don't animate
+        if (Math.Abs(GameState.Currency - _previousCurrency) < 0.01)
+        {
+            return;
+        }
+        
+        _previousCurrency = GameState.Currency;
+        
+        _animating = true;
+        StateHasChanged();
+        
+        Task.Delay(500).ContinueWith(_ =>
+        {
+            _animating = false;
+            StateHasChanged();
+        });
+    }
+    
+    public new void Dispose()
+    {
+        GameState.OnStateChange -= HandleStateChange;
+        base.Dispose();
+    }
+}
