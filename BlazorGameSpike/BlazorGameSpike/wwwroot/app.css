@@ -56,6 +56,19 @@ progress::-webkit-progress-value {
     background: currentColor;
 }
 
+progress[value] {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+progress[value]::-webkit-progress-bar {
+    background: #26547C;
+    
+}
+
+progress[value]::-webkit-progress-value {
+    background: #EF476F;
+}
 a {
     color: #FFD166;
     text-decoration: none;
