@@ -20,21 +20,20 @@ public class PassiveDamageWorker : GameStateComponent, IDisposable
         return TimeSpan.FromMilliseconds(Math.Max(ms, 1));
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
-
         _currentTimerPortalLevel = 0;
-        _unlocked = false;
         _timer = new Timer(OnTick, null, Timeout.Infinite, Timeout.Infinite);
+        _unlocked = false;
         GameState.OnStateChange += CheckDelayChange;
+        await base.OnInitializedAsync();
     }
 
     private void CheckDelayChange()
     {
-        var portalLevel = GameState.Upgrades[Upgrade.Portal].Level;
+        var portalLevel = GameState.GameStateStorage.Upgrades[Upgrade.Portal].Level;
 
-        if (!_unlocked && GameState.Upgrades[Upgrade.Laser].Level > 0)
+        if (!_unlocked && GameState.GameStateStorage.Upgrades[Upgrade.Laser].Level > 0)
         {
             _unlocked = true;
             _timer.Change(GetInterval(portalLevel), GetInterval(portalLevel));

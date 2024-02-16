@@ -1,10 +1,11 @@
 ﻿@inherits GameStateComponent
-@rendermode InteractiveWebAssembly
 @implements IDisposable
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
 
 <output style="color: #EF476F; font-size: xxx-large"
         class="@(_animating ? "shake" : "")">
-    $@GameState.Currency.ToString("0.00")
+    $@GameState.GameStateStorage.Currency.ToString("0.00")
 </output>
 
 @code
@@ -12,23 +13,23 @@
     private bool _animating;
     private double _previousCurrency;
     
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _previousCurrency = GameState.Currency;
+        await base.OnInitializedAsync();
+        _previousCurrency = GameState.GameStateStorage.Currency;
         GameState.OnStateChange += HandleStateChange;
-        
-        base.OnInitialized();
+        StateHasChanged();
     }
     
     void HandleStateChange()
     {
         // If the currency hasn't changed, don't animate
-        if (Math.Abs(GameState.Currency - _previousCurrency) < 0.01)
+        if (Math.Abs(GameState.GameStateStorage.Currency - _previousCurrency) < 0.01)
         {
             return;
         }
         
-        _previousCurrency = GameState.Currency;
+        _previousCurrency = GameState.GameStateStorage.Currency;
         
         _animating = true;
         StateHasChanged();

@@ -1,13 +1,12 @@
-﻿@rendermode InteractiveWebAssembly
-@inherits GameStateComponent
-
+﻿@inherits GameStateComponent
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @* Get Upgrades in order *@
 
 <ol class="shop">
     
     @foreach (var upgrade in Enum.GetValues<Upgrade>())
     {
-        var upgradeState = GameState.Upgrades[upgrade];
+        var upgradeState = GameState.GameStateStorage.Upgrades[upgrade];
 
         <li>
             <button disabled="@(!CanAffordUpgrade(upgradeState))"
@@ -24,7 +23,7 @@
 
 @{
     bool CanAffordUpgrade(UpgradeState upgrade) 
-        => GameState.Currency >= upgrade.CurrentCost;
+        => GameState.GameStateStorage.Currency >= upgrade.CurrentCost;
     
     string GetTooltip(Upgrade upgrade) 
         => upgrade switch

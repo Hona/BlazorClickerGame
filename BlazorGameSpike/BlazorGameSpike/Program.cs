@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using BlazorGameSpike.Client.State;
 using BlazorGameSpike.Components;
 
@@ -8,7 +9,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-builder.Services.AddSingleton<GameState>();
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddScoped<GameState>();
 
 var app = builder.Build();
 

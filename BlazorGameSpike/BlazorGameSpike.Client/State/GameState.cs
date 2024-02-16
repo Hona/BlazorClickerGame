@@ -1,43 +1,60 @@
-﻿namespace BlazorGameSpike.Client.State;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
 
-public class GameState
+namespace BlazorGameSpike.Client.State;
+
+
+public class GameState(ILocalStorageService localStorageService)
 {
     public event Action? OnStateChange;
 
-    public double Currency { get; private set; }
-    public int EnemiesDefeated { get; private set; }
-
-    public IReadOnlyDictionary<Upgrade, UpgradeState> Upgrades { get; private set; } =
-        new Dictionary<Upgrade, UpgradeState>
-        {
-            { Upgrade.Sword, UpgradeState.SeedNew(5) },
-            { Upgrade.Laser, UpgradeState.SeedNew(15) },
-            { Upgrade.Poison, UpgradeState.SeedNew(30, 1.11) },
-            { Upgrade.Portal, UpgradeState.SeedNew(50, 1.12) },
-        };
+    public GameStateStorage GameStateStorage { get; } = new();
     
-    public void AddCurrency(double amount)
+    public async Task Load()
     {
-        Currency += amount;
+        var status = await localStorageService.GetItemAsync<string>("Status");
+        if (string.IsNullOrEmpty(status))
+            return;
+        
+        var state = JsonSerializer.Deserialize<GameStateStorage>(status);
+        if (state == null)
+            return;
+        
+        GameStateStorage.Currency = state.Currency;
+        GameStateStorage.Upgrades = state.Upgrades;
+        GameStateStorage.EnemyHealth = state.EnemyHealth;
+        GameStateStorage.EnemiesDefeated = state.EnemiesDefeated;
+        
         InvokeStateChange();
     }
     
-    private const int StartingEnemyHealth = 10;
-    public int CurrentMaxEnemyHealth => (int)(StartingEnemyHealth * Math.Pow(1.01, EnemiesDefeated));
-    public int EnemyHealth { get; private set; } = StartingEnemyHealth;
+
+    private void AddCurrency(double amount)
+    {
+        GameStateStorage.Currency += amount;
+        InvokeStateChange();
+    }
 
     public void ClickDamageEnemy()
     {
-        const int BaseDamage = 1;
+        const int baseDamage = 1;
 
-        var actualDamage = BaseDamage 
-                           + Upgrades[Upgrade.Sword].Level
-                           + (Upgrades[Upgrade.Poison].Level * 0.1 * PassiveDamage);
+        var actualDamage = baseDamage 
+                           + GameStateStorage.Upgrades[Upgrade.Sword].Level
+                           + (GameStateStorage.Upgrades[Upgrade.Poison].Level * 0.1 * PassiveDamage);
         
         DamageEnemy((int)actualDamage);
     }
 
-    private int PassiveDamage => Upgrades[Upgrade.Laser].Level;
+    private async Task Save()
+    {
+        var status = JsonSerializer.Serialize(GameStateStorage);
+        await localStorageService.SetItemAsync("Status", status);
+    }
+
+    private int PassiveDamage => GameStateStorage.Upgrades[Upgrade.Laser].Level;
     public void PassiveDamageEnemy()
     {
         DamageEnemy(PassiveDamage);
@@ -45,10 +62,10 @@ public class GameState
     
     private void DamageEnemy(int amount)
     {
-        EnemyHealth -= amount;
+        GameStateStorage.EnemyHealth -= amount;
         InvokeStateChange();
 
-        if (EnemyHealth < 0)
+        if (GameStateStorage.EnemyHealth < 0)
         {
             DefeatEnemy();
             AddCurrency(1);
@@ -57,23 +74,27 @@ public class GameState
     
     private void DefeatEnemy()
     {
-        EnemiesDefeated++;
+        GameStateStorage.EnemiesDefeated++;
         
-        EnemyHealth = CurrentMaxEnemyHealth;
+        GameStateStorage.EnemyHealth = GameStateStorage.CurrentMaxEnemyHealth;
     }
     
     public void PurchaseUpgrade(Upgrade upgrade)
     {
-        var upgradeState = Upgrades[upgrade];
+        var upgradeState = GameStateStorage.Upgrades[upgrade];
         
-        if (Currency >= upgradeState.CurrentCost)
+        if (GameStateStorage.Currency >= upgradeState.CurrentCost)
         {
-            Currency -= upgradeState.CurrentCost;
+            GameStateStorage.Currency -= upgradeState.CurrentCost;
             upgradeState.Level++;
             InvokeStateChange();
         }
     }
     
     // TODO: This should be debounced in a real app
-    private void InvokeStateChange() => OnStateChange?.Invoke();
+    private async void InvokeStateChange()
+    {
+        await Save();
+        OnStateChange?.Invoke();
+    }
 }

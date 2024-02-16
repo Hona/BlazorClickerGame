@@ -1,10 +1,10 @@
 ﻿@page "/"
-@rendermode InteractiveWebAssembly
 @inherits GameStateComponent
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
-<progress id="@EnemyProgressId" max="@GameState.CurrentMaxEnemyHealth" value="@GameState.EnemyHealth"></progress
+<progress id="@EnemyProgressId" max="@GameState.GameStateStorage.CurrentMaxEnemyHealth" value="@GameState.GameStateStorage.EnemyHealth"></progress>
 <label for="@EnemyProgressId">
-    @GameState.EnemyHealth/@GameState.CurrentMaxEnemyHealth
+    @GameState.GameStateStorage.EnemyHealth/@GameState.GameStateStorage.CurrentMaxEnemyHealth
 </label>
 
 
