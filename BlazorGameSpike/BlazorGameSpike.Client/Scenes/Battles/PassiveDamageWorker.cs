@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.Design;
 using BlazorGameSpike.Client.Common;
 using BlazorGameSpike.Client.State;
+using Microsoft.AspNetCore.Components;
 
 namespace BlazorGameSpike.Client.Scenes.Battles;
 
@@ -9,6 +10,8 @@ namespace BlazorGameSpike.Client.Scenes.Battles;
 /// </summary>
 public class PassiveDamageWorker : GameStateComponent, IDisposable
 {
+    [Inject] public ILogger<PassiveDamageWorker> Logger { get; set; } = null!;
+    
     private Timer _timer;
     
     private const int BaseIntervalMs = 500;
@@ -25,27 +28,36 @@ public class PassiveDamageWorker : GameStateComponent, IDisposable
         _currentTimerPortalLevel = 0;
         _timer = new Timer(OnTick, null, Timeout.Infinite, Timeout.Infinite);
         _unlocked = false;
+
+        CheckDelayChange();
+        
         GameState.OnStateChange += CheckDelayChange;
         await base.OnInitializedAsync();
     }
 
     private void CheckDelayChange()
     {
-        var portalLevel = GameState.GameStateStorage.Upgrades[Upgrade.Portal].Level;
+        var portalLevel = GameState.Upgrades[Upgrade.Portal].Level;
 
-        if (!_unlocked && GameState.GameStateStorage.Upgrades[Upgrade.Laser].Level > 0)
+        if (!_unlocked && GameState.Upgrades[Upgrade.Laser].Level > 0)
         {
             _unlocked = true;
-            _timer.Change(GetInterval(portalLevel), GetInterval(portalLevel));
+            ChangeTimer(portalLevel);
         }
         else
         {
             if (portalLevel != _currentTimerPortalLevel)
             {
                 _currentTimerPortalLevel = portalLevel;
-                _timer.Change(GetInterval(portalLevel), GetInterval(portalLevel));
+                ChangeTimer(portalLevel);
             }
         }
+    }
+    
+    private void ChangeTimer(int portalLevel)
+    {
+        Logger.LogInformation("Changing timer to {Interval}", GetInterval(portalLevel));
+        _timer.Change(GetInterval(portalLevel), GetInterval(portalLevel));
     }
 
     private void OnTick(object? _)

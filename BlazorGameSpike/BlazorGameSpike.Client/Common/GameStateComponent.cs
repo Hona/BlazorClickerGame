@@ -5,12 +5,11 @@ namespace BlazorGameSpike.Client.Common;
 
 public abstract class GameStateComponent : ComponentBase, IDisposable
 {
-    [Inject] public GameState GameState { get; set; } = null!;
+    [Inject] public PersistedGameState GameState { get; set; } = null!;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         GameState.OnStateChange += StateHasChanged;
-        await GameState.Load();
     }
 
     public void Dispose()
