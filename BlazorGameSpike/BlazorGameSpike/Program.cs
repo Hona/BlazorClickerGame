@@ -1,3 +1,4 @@
+using Blazored.LocalStorage;
 using BlazorGameSpike.Client.State;
 using BlazorGameSpike.Components;
 
@@ -7,8 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
-
-builder.Services.AddSingleton<GameState>();
 
 var app = builder.Build();
 

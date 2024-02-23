@@ -1,6 +1,6 @@
 ﻿@inherits GameStateComponent
-@rendermode InteractiveWebAssembly
 @implements IDisposable
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
 <output style="color: #EF476F; font-size: xxx-large"
         class="@(_animating ? "shake" : "")">

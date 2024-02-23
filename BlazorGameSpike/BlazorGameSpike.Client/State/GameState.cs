@@ -1,38 +1,42 @@
-﻿namespace BlazorGameSpike.Client.State;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
+
+namespace BlazorGameSpike.Client.State;
+
 
 public class GameState
 {
     public event Action? OnStateChange;
-
-    public double Currency { get; private set; }
-    public int EnemiesDefeated { get; private set; }
-
-    public IReadOnlyDictionary<Upgrade, UpgradeState> Upgrades { get; private set; } =
-        new Dictionary<Upgrade, UpgradeState>
+    public double Currency { get; set; }
+    public int EnemiesDefeated { get; set; }
+    private const int StartingEnemyHealth = 10;
+    [JsonIgnore]
+    public int CurrentMaxEnemyHealth => (int)(StartingEnemyHealth * Math.Pow(1.01, EnemiesDefeated));
+    public int EnemyHealth { get; set; } = StartingEnemyHealth;
+    public Dictionary<Upgrade, UpgradeState> Upgrades { get; set; } =
+        new ()
         {
             { Upgrade.Sword, UpgradeState.SeedNew(5) },
             { Upgrade.Laser, UpgradeState.SeedNew(15) },
-            { Upgrade.Poison, UpgradeState.SeedNew(30, 1.11) },
-            { Upgrade.Portal, UpgradeState.SeedNew(50, 1.12) },
+            { Upgrade.Poison, UpgradeState.SeedNew(30, 1.08) },
+            { Upgrade.Portal, UpgradeState.SeedNew(50, 1.09) },
         };
-    
-    public void AddCurrency(double amount)
+
+    private void AddCurrency(double amount)
     {
         Currency += amount;
         InvokeStateChange();
     }
-    
-    private const int StartingEnemyHealth = 10;
-    public int CurrentMaxEnemyHealth => (int)(StartingEnemyHealth * Math.Pow(1.01, EnemiesDefeated));
-    public int EnemyHealth { get; private set; } = StartingEnemyHealth;
 
     public void ClickDamageEnemy()
     {
-        const int BaseDamage = 1;
+        const int baseDamage = 1;
 
-        var actualDamage = BaseDamage 
+        var actualDamage = baseDamage 
                            + Upgrades[Upgrade.Sword].Level
-                           + (Upgrades[Upgrade.Poison].Level * 0.1 * PassiveDamage);
+                           + Upgrades[Upgrade.Poison].Level * 0.1 * PassiveDamage;
         
         DamageEnemy((int)actualDamage);
     }
@@ -60,6 +64,8 @@ public class GameState
         EnemiesDefeated++;
         
         EnemyHealth = CurrentMaxEnemyHealth;
+        
+        InvokeStateChange();
     }
     
     public void PurchaseUpgrade(Upgrade upgrade)
