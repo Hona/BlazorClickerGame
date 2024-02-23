@@ -5,6 +5,13 @@ using Blazored.LocalStorage;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddScoped<GameState>();
+builder.Services.AddScoped<PersistedGameState>();
+builder.Services.AddScoped<GameState, PersistedGameState>(sp => sp.GetRequiredService<PersistedGameState>());
 
-await builder.Build().RunAsync();
+var app = builder.Build();
+
+// Load game save before start, so its available in teh DI
+var persistedGameState = app.Services.GetRequiredService<PersistedGameState>();
+await persistedGameState.LoadAsync();
+
+await app.RunAsync();
