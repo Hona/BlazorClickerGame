@@ -12,12 +12,12 @@
     private bool _animating;
     private double _previousCurrency;
     
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await base.OnInitializedAsync();
         _previousCurrency = GameState.Currency;
         GameState.OnStateChange += HandleStateChange;
-        StateHasChanged();
+        
+        base.OnInitialized();
     }
     
     void HandleStateChange()
