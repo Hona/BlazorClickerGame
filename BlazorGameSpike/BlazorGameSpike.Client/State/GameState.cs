@@ -13,7 +13,7 @@ public class GameState
     public int EnemiesDefeated { get; set; }
     private const int StartingEnemyHealth = 10;
     [JsonIgnore]
-    public int CurrentMaxEnemyHealth => (int)(StartingEnemyHealth * Math.Pow(1.01, EnemiesDefeated));
+    public int CurrentMaxEnemyHealth => (int)(StartingEnemyHealth + EnemiesDefeated * 0.1);
     public int EnemyHealth { get; set; } = StartingEnemyHealth;
     public Dictionary<Upgrade, UpgradeState> Upgrades { get; set; } =
         new ()
