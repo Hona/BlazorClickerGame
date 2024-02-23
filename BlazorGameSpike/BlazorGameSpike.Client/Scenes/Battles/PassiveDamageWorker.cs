@@ -23,7 +23,7 @@ public class PassiveDamageWorker : GameStateComponent, IDisposable
         return TimeSpan.FromMilliseconds(Math.Max(ms, 1));
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         _currentTimerPortalLevel = 0;
         _timer = new Timer(OnTick, null, Timeout.Infinite, Timeout.Infinite);
@@ -32,7 +32,8 @@ public class PassiveDamageWorker : GameStateComponent, IDisposable
         CheckDelayChange();
         
         GameState.OnStateChange += CheckDelayChange;
-        await base.OnInitializedAsync();
+        
+        base.OnInitialized();
     }
 
     private void CheckDelayChange()

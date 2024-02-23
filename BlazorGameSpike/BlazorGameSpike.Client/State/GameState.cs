@@ -80,8 +80,5 @@ public class GameState
     }
     
     // TODO: This should be debounced in a real app
-    private void InvokeStateChange()
-    {
-        OnStateChange?.Invoke();
-    }
+    private void InvokeStateChange() => OnStateChange?.Invoke();
 }
