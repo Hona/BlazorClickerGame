@@ -52,10 +52,10 @@ public class GameState
         EnemyHealth -= amount;
         InvokeStateChange();
 
-        if (EnemyHealth < 0)
+        if (EnemyHealth <= 0)
         {
             DefeatEnemy();
-            AddCurrency(1);
+            AddCurrency(1 + (EnemiesDefeated / 100));
         }
     }
     
