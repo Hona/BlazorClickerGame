@@ -1,7 +1,6 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components;
 
 namespace BlazorGameSpike.Client.State;
 
@@ -22,6 +21,7 @@ public class GameState
             { Upgrade.Laser, UpgradeState.SeedNew(15) },
             { Upgrade.Poison, UpgradeState.SeedNew(30, 1.08) },
             { Upgrade.Portal, UpgradeState.SeedNew(50, 1.09) },
+            { Upgrade.Scavenger, UpgradeState.SeedNew(1000, 2) }
         };
 
     private void AddCurrency(double amount)
@@ -55,7 +55,7 @@ public class GameState
         if (EnemyHealth <= 0)
         {
             DefeatEnemy();
-            AddCurrency(1 + (EnemiesDefeated / 100));
+            AddCurrency(1 + Upgrades[Upgrade.Scavenger].Level);
         }
     }
     

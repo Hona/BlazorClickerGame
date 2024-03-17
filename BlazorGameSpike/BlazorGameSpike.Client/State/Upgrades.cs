@@ -8,5 +8,6 @@ public enum Upgrade
     Sword,
     Laser,
     Poison,
-    Portal
+    Portal,
+    Scavenger
 }
